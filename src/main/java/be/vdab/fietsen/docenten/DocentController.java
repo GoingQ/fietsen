@@ -31,7 +31,6 @@ public class DocentController {
     }
     @GetMapping("{id}")
     Docent findById(@PathVariable long id) {
-        System.out.println("test");
         return docentService.findById(id)
                 .orElseThrow(DocentNietGevondenException::new);
     }
