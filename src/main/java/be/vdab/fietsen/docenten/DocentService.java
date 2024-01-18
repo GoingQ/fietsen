@@ -2,6 +2,7 @@ package be.vdab.fietsen.docenten;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -115,5 +116,11 @@ public class DocentService {
         docentRepository.findById(id)
                 .orElseThrow(DocentNietGevondenException::new)
                 .verwijderBijnaam(bijnaam);
+    }
+
+    //22 N + 1 PROBLEEM
+        //Een JPQL query met join fetch
+    List<Docent> findAllMetBijnamen() {
+        return docentRepository.findAllMetBijnamen();
     }
 }

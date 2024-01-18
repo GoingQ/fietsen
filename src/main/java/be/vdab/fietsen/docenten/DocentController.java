@@ -5,12 +5,15 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.web.bind.annotation.*;
 
 import javax.print.Doc;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("docenten")
@@ -25,10 +28,10 @@ public class DocentController {
     long findAantal() {
         return docentService.findAantal();
     }
-    @GetMapping
+   /* @GetMapping
     List<Docent> findAll() {
         return docentService.findAll();
-    }
+    }*/
     @GetMapping("{id}")
     Docent findById(@PathVariable long id) {
         return docentService.findById(id)
@@ -54,10 +57,10 @@ public class DocentController {
     }
 
     //11. Derived Query
-    @GetMapping(params = "wedde")
+    /*@GetMapping(params = "wedde")
     List<Docent> findByWedde(BigDecimal wedde) {
         return docentService.findByWedde(wedde);
-    }
+    }*/
 
     @GetMapping(params = "emailAdres")
     Docent findByEmailAdres(String emailAdres) {
@@ -70,10 +73,10 @@ public class DocentController {
         return docentService.findAantalMetWedde(wedde);
     }
 
-    @GetMapping("metGrootsteWedde")
+    /*@GetMapping("metGrootsteWedde")
     List<Docent> findMetGrootsteWedde() {
         return docentService.findMetGrootsteWedde();
-    }
+    }*/
 
     //13. DTO
     @GetMapping("weddes/grootste")
@@ -127,4 +130,42 @@ public class DocentController {
                 .getEmailAdres();
     }
 
+    //22 N + 1 PROBLEEM
+        //DTO
+    private record DocentBeknopt(long id, String voornaam, String familienaam) {
+        DocentBeknopt(Docent docent) {
+            this(docent.getId(), docent.getVoornaam(), docent.getFamilienaam());
+        }
+    }
+    @GetMapping
+    Stream<DocentBeknopt> findAll() {
+        return docentService.findAll()
+                .stream()
+                .map(docent -> new DocentBeknopt(docent));
+    }
+    @GetMapping("wedde")
+    Stream<DocentBeknopt> findByWedde(BigDecimal wedde) {
+        return docentService.findByWedde(wedde)
+                .stream()
+                .map(docent -> new DocentBeknopt(docent));
+    }
+    @GetMapping("metGrootsteWedde")
+    Stream<DocentBeknopt> findMetGrootsteWedde() {
+        return docentService.findMetGrootsteWedde()
+                .stream()
+                .map(docent -> new DocentBeknopt(docent));
+    }
+
+        //Een JPQL query met join fetch
+    private record DocentBeknoptMetBijnamen(long id, String voornaam, String familienaam, Set<String> bijnamen) {
+        DocentBeknoptMetBijnamen(Docent docent) {
+            this(docent.getId(), docent.getVoornaam(), docent.getFamilienaam(), docent.getBijnamen());
+        }
+    }
+    @GetMapping("metBijnamen")
+    Stream<DocentBeknoptMetBijnamen> findAllMetBijnamen() {
+        return docentService.findAllMetBijnamen()
+                .stream()
+                .map(docent -> new DocentBeknoptMetBijnamen(docent));
+    }
 }
