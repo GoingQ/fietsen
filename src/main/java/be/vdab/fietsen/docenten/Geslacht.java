@@ -1,2 +1,5 @@
-package be.vdab.fietsen.docenten;public enum Geslacht {
+package be.vdab.fietsen.docenten;
+
+public enum Geslacht {
+    MAN, VROUW, X
 }
